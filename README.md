@@ -1,0 +1,177 @@
+# Thompson
+
+Thompson is the React Native sibling of [Bleecker](https://github.com/gaulatti/bleecker). The two streets frame the Red Lion in New York City; the packages frame the same design system for web and native applications.
+
+Thompson consumes Bleecker's platform-neutral contracts and design tokens, then renders them with React Native primitives. It does not import Bleecker's DOM components, CSS, Radix primitives, or Recharts implementation.
+
+## Visual quality bar
+
+The adjacent `ariston/matteotti` application is Thompson's native reference implementation and visual acceptance standard. New primitives and patterns should match its typography roles, density, safe-area behavior, surface restraint, touch targets, drawer composition, and interaction finish unless a documented platform constraint requires a different treatment.
+
+## Install
+
+```sh
+npm install @gaulatti/thompson @gaulatti/bleecker react react-native react-native-safe-area-context react-native-svg @react-native-community/datetimepicker @react-native-community/slider expo-font @expo-google-fonts/encode-sans @expo-google-fonts/libre-franklin
+```
+
+### Load Thompson's fonts
+
+Thompson uses the same typography as Bleecker: Encode Sans for interface and display text, and Libre Franklin for secondary copy. React Native applications must load those faces before rendering the provider:
+
+```tsx
+import { useFonts } from 'expo-font';
+import { EncodeSans_400Regular } from '@expo-google-fonts/encode-sans/400Regular';
+import { EncodeSans_500Medium } from '@expo-google-fonts/encode-sans/500Medium';
+import { EncodeSans_600SemiBold } from '@expo-google-fonts/encode-sans/600SemiBold';
+import { EncodeSans_700Bold } from '@expo-google-fonts/encode-sans/700Bold';
+import { LibreFranklin_400Regular } from '@expo-google-fonts/libre-franklin/400Regular';
+import { LibreFranklin_500Medium } from '@expo-google-fonts/libre-franklin/500Medium';
+
+const [fontsLoaded] = useFonts({
+  EncodeSans_400Regular,
+  EncodeSans_500Medium,
+  EncodeSans_600SemiBold,
+  EncodeSans_700Bold,
+  LibreFranklin_400Regular,
+  LibreFranklin_500Medium,
+});
+
+if (!fontsLoaded) return null;
+return <ThompsonProvider>{children}</ThompsonProvider>;
+```
+
+Bare React Native applications can register the same files under the exported `thompsonFonts` names, or pass their registered names through the provider's `fonts` prop.
+
+Wrap the native application once:
+
+```tsx
+import { ThompsonProvider } from '@gaulatti/thompson';
+
+export default function App() {
+  return <ThompsonProvider>{/* application */}</ThompsonProvider>;
+}
+```
+
+Then use native components with Bleecker-aligned semantic props:
+
+```tsx
+import { Button, Card, Field, Input, Stack } from '@gaulatti/thompson';
+
+export function AccountForm() {
+  return (
+    <Card>
+      <Stack>
+        <Field label='Email address'>
+          <Input keyboardType='email-address' />
+        </Field>
+        <Button onPress={() => undefined}>Continue</Button>
+      </Stack>
+    </Card>
+  );
+}
+```
+
+## Theme persistence
+
+Thompson does not force an AsyncStorage dependency. Inject any compatible storage implementation:
+
+```tsx
+<ThompsonProvider storage={AsyncStorage} storageKey='app-theme'>
+  {children}
+</ThompsonProvider>
+```
+
+## Bleecker parity
+
+Thompson has a native implementation for every public Bleecker module. The names and semantic roles match; interaction and layout follow mobile conventions. This includes:
+
+- `AppShell`, `AdminShell`, headers, footer, sidebar, panels, and bottom-tab navigation
+- Inputs, selection controls, date/range controls, filters, command search, and file-picking contracts
+- Modals, sheets, drawers, dialogs, popovers, menus, tooltips, notifications, and toasts
+- Tables, data lists, dashboards, feeds, timelines, steppers, metrics, and status components
+- Native SVG line, area, bar, pie, donut, scatter, radar, radial, funnel, Sankey, sunburst, and sparkline charts
+- Media, carousel, authentication, theme, formatting, and brand primitives
+
+Exact component subpaths are supported, for example `@gaulatti/thompson/components/line-chart` and `@gaulatti/thompson/layout/app-shell`.
+
+`npm run check:parity:strict` compares Thompson against the adjacent Bleecker public barrel and fails unless every Bleecker module exists and every Bleecker public symbol is exported by its native counterpart. Native-only additions are allowed. The normal `npm run check` includes this strict assertion, plus a Storybook gate for production-critical components.
+
+## Synchronization contract
+
+Portable variant sets, sizes, theme modes, formatting helpers, and design tokens come from Bleecker. `npm run check:contracts` executes against Bleecker's built leaf exports and fails when Thompson's expected contract drifts. Native-only interaction props such as `onPress` and `onValueChange` remain available alongside shared semantic aliases where useful.
+
+## Native application shell
+
+The shell owns safe areas, header/footer composition, content, adaptive drawer navigation, and optional mobile tabs. The application continues to own routing and data. Use `AdminShell` for drawer-on-phone/sidebar-on-wide administration:
+
+```tsx
+<AdminShell
+  brand={{ name: 'ariston', logo: <BrandMark /> }}
+  navigationItems={items}
+  onNavigationItemPress={(item) => router.navigate(item.id)}
+>
+  <Dashboard />
+</AdminShell>
+```
+
+Use `AppShell` when bottom tabs are the appropriate information architecture:
+
+```tsx
+<AppShell
+  header={<Header brand={{ name: 'sonar' }} />}
+  tabs={tabs}
+  activeTab={activeTab}
+  onTabChange={setActiveTab}
+>
+  {screens[activeTab]}
+</AppShell>
+```
+
+## Development
+
+The adjacent Bleecker checkout supplies `@gaulatti/bleecker/core` and `@gaulatti/bleecker/tokens` during development. Thompson installs it as a packed local dependency so Bleecker's web-only dependency tree cannot leak a second React into Expo. Refresh the snapshot after changing Bleecker:
+
+```sh
+npm install
+npm run sync:bleecker
+npm run check
+```
+
+The rich-text editor is an optional subpath because it brings a WebView dependency:
+
+```sh
+npm install react-native-webview
+```
+
+```tsx
+import { RichTextEditor } from '@gaulatti/thompson/components/rich-text-editor';
+```
+
+## Storybook and native preview
+
+The `example` workspace is a complete Expo application and navigable native component catalog. Its `AdminShell` menu opens real pages for typography, surfaces, buttons, forms, feedback, data display, overlays, navigation, charts, and production admin patterns.
+
+React Native Storybook remains available as the isolated story inspection surface. Stories run through Metro on an iOS simulator, Android emulator, or physical Expo development device, and use the same real Thompson components and provider.
+
+On device, Storybook uses a custom Thompson renderer: `AdminShell` owns the safe area, brand header, generated story navigation tree, appearance control, and story canvas. Storybook supplies story discovery and selection without placing its stock mobile chrome around Thompson.
+
+```sh
+# Open on-device Storybook
+npm run storybook:ios
+npm run storybook:android
+
+# Start Storybook and choose a device from Expo
+npm run storybook:start
+
+# Run the regular component gallery
+npm run example:ios
+npm run example:android
+```
+
+Storybook includes full-screen tab and adaptive admin shells, admin/resource patterns, schema forms, relationship selection, rich-text editing, foundations, inputs, overlays, feedback, data display, and native visualizations. Use its toolbar to switch stories between light, dark, and system themes.
+
+To validate the complete Storybook Metro bundle without opening a simulator:
+
+```sh
+npm run storybook:export
+```

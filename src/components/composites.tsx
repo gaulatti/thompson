@@ -1,0 +1,45 @@
+import React from 'react';
+import { Pressable, StyleSheet, View, type DimensionValue, type ViewProps } from 'react-native';
+import { radii, spacing } from '@gaulatti/bleecker/tokens';
+
+import { useThompsonTheme } from '../theme';
+import { Card } from './card';
+import { Heading, Text } from './typography';
+
+export interface ButtonGroupProps extends ViewProps { orientation?: 'horizontal' | 'vertical'; }
+export function ButtonGroup({ orientation = 'horizontal', style, ...props }: ButtonGroupProps) { return <View style={[styles.group, orientation === 'vertical' && styles.vertical, style]} {...props} />; }
+
+export type StatTrendDirection = 'up' | 'down' | 'neutral';
+export interface StatCardProps extends ViewProps { description?: string; footer?: React.ReactNode; icon?: React.ReactNode; sparklineData?: Record<string, unknown>[]; sparklineDataKey?: string; sparklineColor?: string; title: string; trend?: { direction: StatTrendDirection; label?: string; value: string }; value: React.ReactNode; }
+export function StatCard({ description, footer, icon, style, title, trend, value, ...props }: StatCardProps) { return <Card padding='sm' style={style} {...props}><View style={styles.statRow}>{icon}<View style={styles.copy}><Text family='secondary' numberOfLines={2} size='sm' tone='secondary' weight='500'>{title}</Text>{typeof value === 'string' || typeof value === 'number' ? <Heading adjustsFontSizeToFit level={2} numberOfLines={1}>{value}</Heading> : value}{trend ? <Text size='sm' tone={trend.direction === 'down' ? 'danger' : trend.direction === 'up' ? 'accent' : 'secondary'}>{trend.direction === 'up' ? '↗' : trend.direction === 'down' ? '↘' : '→'} {trend.value}{trend.label ? ` ${trend.label}` : ''}</Text> : description ? <Text family='secondary' size='sm' tone='secondary'>{description}</Text> : null}</View></View>{footer ? <View style={styles.footer}>{footer}</View> : null}</Card>; }
+
+export interface DashboardGridProps extends ViewProps { columns?: 1 | 2 | 3 | 4; }
+export function DashboardGrid({ children, columns = 2, style, ...props }: DashboardGridProps) {
+  const width = { 1: '100%', 2: '47%', 3: '30%', 4: '22%' }[columns] as DimensionValue;
+  return <View style={[styles.grid, style]} {...props}>{React.Children.map(children, (child) => <View style={{ flexGrow: 1, minWidth: width, width }}>{child}</View>)}</View>;
+}
+export interface DashboardSpanProps extends ViewProps { span?: number; }
+export function DashboardSpan({ span = 1, style, ...props }: DashboardSpanProps) { return <View style={[{ flex: span, minWidth: 0 }, style]} {...props} />; }
+
+export interface DashboardSectionProps extends ViewProps { action?: React.ReactNode; description?: string; headerStyle?: ViewProps['style']; title: string; }
+export function DashboardSection({ action, children, description, headerStyle, style, title, ...props }: DashboardSectionProps) { return <View style={[styles.section, style]} {...props}><View style={[styles.row, headerStyle]}><View style={styles.copy}><Heading level={3}>{title}</Heading>{description ? <Text tone='secondary'>{description}</Text> : null}</View>{action}</View>{children}</View>; }
+
+export interface DataListItem { description?: React.ReactNode; id: string; label: React.ReactNode; value: React.ReactNode; }
+export interface DataListProps extends ViewProps { items: DataListItem[]; striped?: boolean; }
+export function DataList({ items, striped = false, style, ...props }: DataListProps) { const { theme } = useThompsonTheme(); return <View style={style} {...props}>{items.map((item, index) => <View key={item.id} style={[styles.dataRow, { borderBottomColor: theme.colors.border }, striped && index % 2 === 0 && { backgroundColor: theme.colors.muted }]}><View style={styles.copy}>{typeof item.label === 'string' ? <Text size='sm' tone='secondary'>{item.label}</Text> : item.label}</View><View style={styles.value}>{typeof item.value === 'string' || typeof item.value === 'number' ? <Text size='sm' weight='600'>{item.value}</Text> : item.value}{typeof item.description === 'string' ? <Text size='xs' tone='secondary'>{item.description}</Text> : item.description}</View></View>)}</View>; }
+
+export type StepStatus = 'pending' | 'active' | 'completed' | 'error';
+export interface Step { description?: string; disabled?: boolean; id: string; label: string; status?: StepStatus; }
+export interface StepperProps extends ViewProps { activeStep?: string; onStepClick?: (step: Step) => void; orientation?: 'horizontal' | 'vertical'; steps: Step[]; }
+export function Stepper({ activeStep, onStepClick, orientation = 'horizontal', steps, style, ...props }: StepperProps) { const { theme } = useThompsonTheme(); const activeIndex = steps.findIndex((step) => step.id === activeStep); return <View style={[styles.group, orientation === 'vertical' && styles.vertical, style]} {...props}>{steps.map((step, index) => { const status = step.status ?? (index < activeIndex ? 'completed' : index === activeIndex ? 'active' : 'pending'); return <Pressable key={step.id} disabled={step.disabled || !onStepClick} onPress={() => onStepClick?.(step)} style={[styles.step, orientation === 'horizontal' && styles.stepHorizontal]}><View style={[styles.stepCircle, { backgroundColor: status === 'error' ? theme.colors.destructive : status === 'pending' ? theme.colors.muted : theme.colors.sea }]}><Text size='xs' style={status === 'pending' ? undefined : { color: '#fff' }}>{status === 'completed' ? '✓' : index + 1}</Text></View><Text size='sm' weight={status === 'active' ? '600' : '500'}>{step.label}</Text>{step.description ? <Text size='xs' tone='secondary'>{step.description}</Text> : null}</Pressable>; })}</View>; }
+
+export type TimelineStatus = StepStatus;
+export interface TimelineItem { description?: string; icon?: React.ReactNode; id: string; status?: TimelineStatus; timestamp?: string; title: string; }
+export interface TimelineProps extends ViewProps { items: TimelineItem[]; }
+export function Timeline({ items, style, ...props }: TimelineProps) { const { theme } = useThompsonTheme(); return <View style={[styles.vertical, style]} {...props}>{items.map((item, index) => <View key={item.id} style={styles.timelineRow}><View style={[styles.timelineIcon, { backgroundColor: item.status === 'error' ? theme.colors.destructive : item.status === 'pending' ? theme.colors.muted : theme.colors.sea }]}>{item.icon ?? <Text size='xs' style={item.status === 'pending' ? undefined : { color: '#fff' }}>{index + 1}</Text>}</View><View style={styles.copy}><View style={styles.row}><Text size='sm' weight='600' style={styles.copy}>{item.title}</Text>{item.timestamp ? <Text size='xs' tone='secondary'>{item.timestamp}</Text> : null}</View>{item.description ? <Text size='sm' tone='secondary'>{item.description}</Text> : null}</View></View>)}</View>; }
+
+export interface ProgressStackItem { color?: string; label: string; value: number; }
+export interface ProgressStackProps extends ViewProps { items: ProgressStackItem[]; max?: number; showLegend?: boolean; }
+export function ProgressStack({ items, max, showLegend = true, style, ...props }: ProgressStackProps) { const { theme } = useThompsonTheme(); const total = max ?? items.reduce((sum, item) => sum + item.value, 0); return <View style={[styles.vertical, style]} {...props}><View style={[styles.progressTrack, { backgroundColor: theme.colors.muted }]}>{items.map((item, index) => <View key={`${item.label}:${index}`} style={{ backgroundColor: item.color ?? theme.colors.sea, flex: total > 0 ? item.value / total : 0 }} />)}</View>{showLegend ? <View style={styles.group}>{items.map((item) => <View key={item.label} style={styles.row}><View style={[styles.dot, { backgroundColor: item.color ?? theme.colors.sea }]} /><Text size='xs' tone='secondary'>{item.label}</Text><Text size='xs' weight='600'>{item.value}</Text></View>)}</View> : null}</View>; }
+
+const styles = StyleSheet.create({ copy: { flex: 1, gap: 4, minWidth: 0 }, dataRow: { borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: 'row', gap: spacing.component, padding: spacing.control }, dot: { borderRadius: 99, height: 8, width: 8 }, footer: { marginTop: spacing.component }, grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.component }, group: { alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: spacing.control }, progressTrack: { borderRadius: radii.pill, flexDirection: 'row', height: 12, overflow: 'hidden' }, row: { alignItems: 'center', flexDirection: 'row', gap: spacing.control }, section: { gap: spacing.component }, statRow: { alignItems: 'center', flexDirection: 'row', gap: spacing.control, minHeight: 52 }, step: { alignItems: 'center', gap: 4 }, stepCircle: { alignItems: 'center', borderRadius: 99, height: 32, justifyContent: 'center', width: 32 }, stepHorizontal: { flex: 1 }, timelineIcon: { alignItems: 'center', borderRadius: radii.ui, height: 36, justifyContent: 'center', width: 36 }, timelineRow: { flexDirection: 'row', gap: spacing.control }, value: { alignItems: 'flex-end', flex: 1, gap: 3 }, vertical: { alignItems: 'stretch', flexDirection: 'column', gap: spacing.component } });

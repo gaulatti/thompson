@@ -1,0 +1,131 @@
+{
+  "name": "@gaulatti/thompson",
+  "version": "0.1.0",
+  "description": "React Native port of Bleecker. If you know both, you're in the Red Lion.",
+  "author": {
+    "name": "Javier Godoy",
+    "email": "jack@gaulatti.com",
+    "url": "https://gaulatti.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaulatti/thompson.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gaulatti/thompson/issues"
+  },
+  "homepage": "https://github.com/gaulatti/thompson#readme",
+  "keywords": [
+    "react-native",
+    "design-system",
+    "component-library",
+    "mobile",
+    "ios",
+    "android",
+    "bleecker"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "react-native": "./dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "workspaces": [
+    "example"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "react-native": "./dist/index.js",
+      "import": "./dist/index.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*.d.ts",
+      "react-native": "./dist/components/*.js",
+      "import": "./dist/components/*.js"
+    },
+    "./layout/*": {
+      "types": "./dist/layout/*.d.ts",
+      "react-native": "./dist/layout/*.js",
+      "import": "./dist/layout/*.js"
+    },
+    "./theme": {
+      "types": "./dist/theme/index.d.ts",
+      "react-native": "./dist/theme/index.js",
+      "import": "./dist/theme/index.js"
+    },
+    "./theme/*": {
+      "types": "./dist/theme/*.d.ts",
+      "react-native": "./dist/theme/*.js",
+      "import": "./dist/theme/*.js"
+    },
+    "./assets/*": {
+      "types": "./dist/assets/*.d.ts",
+      "react-native": "./dist/assets/*.js",
+      "import": "./dist/assets/*.js"
+    },
+    "./utils/*": {
+      "types": "./dist/utils/*.d.ts",
+      "react-native": "./dist/utils/*.js",
+      "import": "./dist/utils/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "packageManager": "npm@10.9.3",
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc -p tsconfig.build.json && node scripts/fix-esm-imports.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck:example": "npm run typecheck --workspace=@gaulatti/thompson-example",
+    "check:contracts": "node scripts/check-bleecker-contracts.mjs",
+    "check:parity": "node scripts/check-bleecker-parity.mjs",
+    "check:parity:strict": "node scripts/check-bleecker-parity.mjs --strict",
+    "check:stories": "node scripts/check-story-coverage.mjs",
+    "check": "npm run typecheck && npm run typecheck:example && npm run build && npm run check:contracts && npm run check:parity:strict && npm run check:stories",
+    "sync:bleecker": "node scripts/sync-bleecker.mjs",
+    "example": "npm run start --workspace=@gaulatti/thompson-example",
+    "example:ios": "npm run ios --workspace=@gaulatti/thompson-example",
+    "example:android": "npm run android --workspace=@gaulatti/thompson-example",
+    "storybook:start": "npm run storybook:start --workspace=@gaulatti/thompson-example",
+    "storybook:ios": "npm run storybook:ios --workspace=@gaulatti/thompson-example",
+    "storybook:android": "npm run storybook:android --workspace=@gaulatti/thompson-example",
+    "storybook:export": "npm run storybook:export --workspace=@gaulatti/thompson-example",
+    "prepack": "npm run check"
+  },
+  "peerDependencies": {
+    "@gaulatti/bleecker": ">=0.1.35 <1",
+    "@react-native-community/datetimepicker": ">=9 <10",
+    "@react-native-community/slider": ">=5 <6",
+    "react": "^18.2.0 || ^19.0.0",
+    "react-native": ">=0.76 <1",
+    "react-native-safe-area-context": "5.7.0",
+    "react-native-svg": ">=15 <16",
+    "react-native-webview": ">=13 <14"
+  },
+  "peerDependenciesMeta": {
+    "react-native-webview": { "optional": true }
+  },
+  "devDependencies": {
+    "@gaulatti/bleecker": "file:../bleecker",
+    "@types/react": "^19.2.18",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "^0.86.2",
+    "react-native-svg": "15.15.4",
+    "react-native-webview": "13.16.1",
+    "typescript": "~6.0.3"
+  },
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native-gesture-handler": "2.32.0",
+    "react-native-safe-area-context": "5.7.0"
+  }
+}

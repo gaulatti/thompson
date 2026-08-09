@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Thompson Storybook",
+    "slug": "thompson-storybook",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.gaulatti.thompson.storybook",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.gaulatti.thompson.storybook"
+    }
+  }
+}

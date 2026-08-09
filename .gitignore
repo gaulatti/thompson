@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.tgz
+.DS_Store
+.expo/
+example/.storybook-build/
+example/.expo-build/
+example/.rnstorybook/storybook.requires.ts
