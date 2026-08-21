@@ -11,7 +11,7 @@ The adjacent `ariston/matteotti` application is Thompson's native reference impl
 ## Install
 
 ```sh
-npm install @gaulatti/thompson @gaulatti/bleecker react react-native react-native-safe-area-context react-native-svg @react-native-community/datetimepicker @react-native-community/slider expo-font @expo-google-fonts/encode-sans @expo-google-fonts/libre-franklin
+npm install @gaulatti/thompson @gaulatti/bleecker react react-native react-native-safe-area-context react-native-svg react-native-webview @react-native-community/datetimepicker @react-native-community/slider expo-font @expo-google-fonts/encode-sans @expo-google-fonts/libre-franklin
 ```
 
 ### Load Thompson's fonts
@@ -51,6 +51,8 @@ export default function App() {
   return <ThompsonProvider>{/* application */}</ThompsonProvider>;
 }
 ```
+
+`ThompsonProvider` owns the native safe-area provider. Applications should not add a second wrapper solely for Thompson components.
 
 Then use native components with Bleecker-aligned semantic props:
 
@@ -137,7 +139,7 @@ npm run sync:bleecker
 npm run check
 ```
 
-The rich-text editor is an optional subpath because it brings a WebView dependency:
+The rich-text editor uses the required native WebView peer:
 
 ```sh
 npm install react-native-webview
@@ -146,6 +148,18 @@ npm install react-native-webview
 ```tsx
 import { RichTextEditor } from '@gaulatti/thompson/components/rich-text-editor';
 ```
+
+Pass `articleComponents` to enable Auburndale-compatible article authoring. The editor exposes the same eleven block choices and emits the same Lexical `type: 'block'` field shapes. Unknown nodes and block types are preserved, while malformed documents fail closed without overwriting the last valid value.
+
+```tsx
+<RichTextEditor
+  articleComponents
+  value={document}
+  onChange={setDocument}
+/>
+```
+
+Run `npm run test:rich-text` to verify every component schema, cancellation/default behavior, native/WebView parity, and generated ESM file and directory imports.
 
 ## Storybook and native preview
 

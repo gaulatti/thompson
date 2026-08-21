@@ -88,6 +88,7 @@
     "check:parity": "node scripts/check-bleecker-parity.mjs",
     "check:parity:strict": "node scripts/check-bleecker-parity.mjs --strict",
     "check:stories": "node scripts/check-story-coverage.mjs",
+    "test:rich-text": "npm run build && node --test tests/*.test.mjs",
     "check": "npm run typecheck && npm run typecheck:example && npm run build && npm run check:contracts && npm run check:parity:strict && npm run check:stories",
     "sync:bleecker": "node scripts/sync-bleecker.mjs",
     "example": "npm run start --workspace=@gaulatti/thompson-example",
@@ -108,9 +109,6 @@
     "react-native-safe-area-context": "5.7.0",
     "react-native-svg": ">=15 <16",
     "react-native-webview": ">=13 <14"
-  },
-  "peerDependenciesMeta": {
-    "react-native-webview": { "optional": true }
   },
   "devDependencies": {
     "@gaulatti/bleecker": "file:../bleecker",

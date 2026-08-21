@@ -13,6 +13,18 @@ const importRegex = /((?:import|export)\s+(?:[^'\"]*?\s+from\s+)?['\"])(\.\.?\/[
 
 for (const file of files) {
   const source = await fs.readFile(file, 'utf8');
-  const next = source.replace(importRegex, (match, prefix, specifier, suffix) => path.extname(specifier) ? match : `${prefix}${specifier}.js${suffix}`);
+  const replacements = await Promise.all([...source.matchAll(importRegex)].map(async (match) => {
+    const [full, prefix, specifier, suffix] = match;
+    if (path.extname(specifier)) return [full, full];
+    const directoryIndex = path.resolve(path.dirname(file), specifier, 'index.js');
+    try {
+      await fs.access(directoryIndex);
+      return [full, `${prefix}${specifier}/index.js${suffix}`];
+    } catch {
+      return [full, `${prefix}${specifier}.js${suffix}`];
+    }
+  }));
+  const replacementMap = new Map(replacements);
+  const next = source.replace(importRegex, (match) => replacementMap.get(match) ?? match);
   if (source !== next) await fs.writeFile(file, next);
 }
