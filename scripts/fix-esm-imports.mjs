@@ -1,4 +1,5 @@
 import { promises as fs } from 'node:fs';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 const distDir = path.resolve(process.cwd(), 'dist');
@@ -13,6 +14,13 @@ const importRegex = /((?:import|export)\s+(?:[^'\"]*?\s+from\s+)?['\"])(\.\.?\/[
 
 for (const file of files) {
   const source = await fs.readFile(file, 'utf8');
-  const next = source.replace(importRegex, (match, prefix, specifier, suffix) => path.extname(specifier) ? match : `${prefix}${specifier}.js${suffix}`);
+  const next = source.replace(importRegex, (match, prefix, specifier, suffix) => {
+    if (path.extname(specifier)) return match;
+    const moduleFile = path.resolve(path.dirname(file), `${specifier}.js`);
+    const directoryIndex = path.resolve(path.dirname(file), specifier, 'index.js');
+    if (existsSync(moduleFile)) return `${prefix}${specifier}.js${suffix}`;
+    if (existsSync(directoryIndex)) return `${prefix}${specifier}/index.js${suffix}`;
+    throw new Error(`Cannot resolve emitted ESM import ${specifier} from ${file}`);
+  });
   if (source !== next) await fs.writeFile(file, next);
 }
