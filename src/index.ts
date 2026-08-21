@@ -26,6 +26,7 @@ export * from './components/overlays';
 export * from './components/progress';
 export * from './components/rich-text-editor';
 export * from './components/rich-text-contract';
+export * from './components/rich-text-html';
 export * from './components/feed-item';
 export * from './components/filter-chip';
 export * from './components/panel';

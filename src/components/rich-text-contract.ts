@@ -34,6 +34,12 @@ export function summarizeArticleComponentFields(fields: ArticleComponentFields):
   }
 }
 
+// Executed only inside the isolated editor WebView. The regression suite checks
+// every component type against summarizeArticleComponentFields above.
+export const ARTICLE_COMPONENT_SUMMARY_WEB_SCRIPT = String.raw`
+function summary(fields){switch(String(fields.blockType||'')){case'youtubeVideo':return String(fields.videoId||'');case'xPost':case'instagramPost':case'tiktokVideo':case'audioEmbed':return String(fields.url||'');case'pullQuote':return String(fields.quote||'');case'infoBox':return(String(fields.tone||'neutral')+' '+String(fields.title||'').trim()).trim();case'keyPoints':return(Array.isArray(fields.points)?fields.points.length:0)+' points';case'relatedLinks':return(Array.isArray(fields.links)?fields.links.length:0)+' links';case'dataTable':return(Array.isArray(fields.headers)?fields.headers.length:0)+' columns';case'liveUpdate':return String(fields.headline||'');default:return''}}
+`;
+
 function toPipeList(rawValue: string): string[] {
   return rawValue.split('|').map((entry) => entry.trim()).filter(Boolean);
 }

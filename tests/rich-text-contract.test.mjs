@@ -4,6 +4,7 @@ import vm from 'node:vm';
 
 import {
   ARTICLE_COMPONENT_OPTIONS,
+  ARTICLE_COMPONENT_SUMMARY_WEB_SCRIPT,
   ARTICLE_COMPONENT_WEB_SCRIPT,
   buildArticleComponentFields,
   summarizeArticleComponentFields
@@ -39,6 +40,13 @@ function buildInWebView(blockType, values) {
   return normalize(context.output);
 }
 
+function summarizeInWebView(fields) {
+  const context = { fields, output: undefined };
+  vm.createContext(context);
+  vm.runInContext(`${ARTICLE_COMPONENT_SUMMARY_WEB_SCRIPT}\noutput=summary(fields);`, context);
+  return context.output;
+}
+
 test('exposes the exact eleven Auburndale component choices', () => {
   assert.deepEqual(ARTICLE_COMPONENT_OPTIONS.map(({ value }) => value), cases.map(([value]) => value));
 });
@@ -57,6 +65,11 @@ test('required cancellation, blank values, malformed lists, and unknown types fa
   assert.equal(buildArticleComponentFields('relatedLinks', prompts(['invalid', 'Title'])), null);
   assert.equal(buildArticleComponentFields('dataTable', prompts(['Name', '   '])), null);
   assert.equal(buildArticleComponentFields('futureComponent', () => 'value'), null);
+  assert.equal(buildInWebView('youtubeVideo', []), null);
+  assert.equal(buildInWebView('youtubeVideo', ['   ']), null);
+  assert.equal(buildInWebView('relatedLinks', ['invalid', 'Title']), null);
+  assert.equal(buildInWebView('dataTable', ['Name', '   ']), null);
+  assert.equal(buildInWebView('futureComponent', ['value']), null);
 });
 
 test('defaults and summaries match Auburndale', () => {
@@ -65,4 +78,19 @@ test('defaults and summaries match Auburndale', () => {
   assert.equal(summarizeArticleComponentFields({ blockType: 'keyPoints', points: ['One', 'Two'] }), '2 points');
   assert.equal(summarizeArticleComponentFields({ blockType: 'infoBox', tone: 'warning', title: 'Notice' }), 'warning Notice');
   assert.equal(summarizeArticleComponentFields({ blockType: 'futureComponent' }), '');
+  const summaryCases = [
+    [{ blockType: 'youtubeVideo', videoId: 'video-123' }, 'video-123'],
+    [{ blockType: 'xPost', url: 'https://example.com/x' }, 'https://example.com/x'],
+    [{ blockType: 'instagramPost', url: 'https://example.com/instagram' }, 'https://example.com/instagram'],
+    [{ blockType: 'tiktokVideo', url: 'https://example.com/tiktok' }, 'https://example.com/tiktok'],
+    [{ blockType: 'audioEmbed', url: 'https://example.com/audio' }, 'https://example.com/audio'],
+    [{ blockType: 'pullQuote', quote: 'Quoted text' }, 'Quoted text'],
+    [{ blockType: 'relatedLinks', links: [{ label: 'One', url: 'https://example.com' }] }, '1 links'],
+    [{ blockType: 'dataTable', headers: [{ value: 'One' }, { value: 'Two' }] }, '2 columns'],
+    [{ blockType: 'liveUpdate', headline: 'Breaking headline' }, 'Breaking headline']
+  ];
+  for (const [fields, expected] of summaryCases) {
+    assert.equal(summarizeArticleComponentFields(fields), expected);
+    assert.equal(summarizeInWebView(fields), expected);
+  }
 });
