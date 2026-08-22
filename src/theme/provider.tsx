@@ -1,6 +1,7 @@
 import { resolveTheme, themeModes, type ThemeMode } from '@gaulatti/bleecker/core';
 import React from 'react';
 import { useColorScheme } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { createThompsonTheme } from './create-theme';
 import type { ThompsonProviderProps, ThompsonTheme } from './types';
@@ -52,7 +53,7 @@ export function ThompsonProvider({ children, defaultTheme = 'system', fonts, sto
   const theme = React.useMemo(() => createThompsonTheme(colorScheme, fonts), [colorScheme, fonts]);
   const value = React.useMemo(() => ({ cycleTheme, setThemeMode, theme, themeMode }), [cycleTheme, setThemeMode, theme, themeMode]);
 
-  return <ThompsonThemeContext.Provider value={value}>{children}</ThompsonThemeContext.Provider>;
+  return <SafeAreaProvider><ThompsonThemeContext.Provider value={value}>{children}</ThompsonThemeContext.Provider></SafeAreaProvider>;
 }
 
 export function useThompsonTheme() {

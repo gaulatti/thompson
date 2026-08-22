@@ -90,6 +90,7 @@
     "check:stories": "node scripts/check-story-coverage.mjs",
     "test": "npm run build && node --test tests/*.test.mjs",
     "check": "npm run typecheck && npm run typecheck:example && npm run build && node --test tests/*.test.mjs && npm run check:contracts && npm run check:parity:strict && npm run check:stories",
+    "test:rich-text": "npm run build && node --test tests/*.test.mjs",
     "sync:bleecker": "node scripts/sync-bleecker.mjs",
     "example": "npm run start --workspace=@gaulatti/thompson-example",
     "example:ios": "npm run ios --workspace=@gaulatti/thompson-example",
@@ -109,9 +110,6 @@
     "react-native-safe-area-context": "5.7.0",
     "react-native-svg": ">=15 <16",
     "react-native-webview": ">=13 <14"
-  },
-  "peerDependenciesMeta": {
-    "react-native-webview": { "optional": true }
   },
   "devDependencies": {
     "@gaulatti/bleecker": "file:../bleecker",
