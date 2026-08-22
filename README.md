@@ -96,6 +96,20 @@ Thompson has a native implementation for every public Bleecker module. The names
 
 Exact component subpaths are supported, for example `@gaulatti/thompson/components/line-chart` and `@gaulatti/thompson/layout/app-shell`.
 
+### Responsive parity layouts
+
+The native counterparts to Bleecker's page-level layouts preserve the same public names and variants while using device-native behavior:
+
+- `PageFrame` maps `reading`, `content`, `wide`, and `full` measures plus gutter and vertical-spacing variants to native points. It applies left/right safe-area insets by default; pass `safeAreaEdges` when a screen owns additional edges.
+- `AuthShell` renders `centered` and `split` flows. Split access and aside panels stack on narrow phones and render side by side at the configurable tablet breakpoint. Unlike Bleecker's DOM implementation, the native aside is retained in the phone flow instead of being hidden.
+- `DetailLayout` stacks its optional rail on phones. On wide devices, `sticky` uses an independently scrollable, height-bounded rail, which is the native equivalent of a CSS sticky rail and avoids silently dropping the behavior.
+- `FeedColumn` owns an independent vertical `ScrollView`. Place lanes in `FeedColumns` to show multiple columns when width permits or full-width, magnetically paged horizontal lanes on phones. Direction locking and nested-scroll support keep vertical reading and horizontal lane changes distinct.
+- `FeedGrid` measures its native container and chooses the largest column count that preserves `minColumnWidth`.
+
+`AttentionSurface` and `createAttentionColor` use the same 0-10 clamping, red-mix, and coverage progression as Bleecker. React Native cannot render CSS `color-mix()` gradients, so Thompson resolves deterministic light/dark concrete colors and provides pressed, focused, and disabled states. `Eyebrow` accepts Bleecker's tones, rule option, and web `as` names; the latter intentionally render as accessible native text rather than DOM elements.
+
+The Storybook `Parity/Native layouts` group includes phone/tablet, compact/wide, interaction, typography, grid, and theme fixtures for these contracts.
+
 `npm run check:parity:strict` compares Thompson against the adjacent Bleecker public barrel and fails unless every Bleecker module exists and every Bleecker public symbol is exported by its native counterpart. Native-only additions are allowed. The normal `npm run check` includes this strict assertion, plus a Storybook gate for production-critical components.
 
 ## Synchronization contract

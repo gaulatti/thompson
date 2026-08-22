@@ -6,9 +6,9 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const storiesRoot = path.join(root, 'example/stories');
 const required = [
-  'Accordion', 'AdminShell', 'Alert', 'AlertDialog', 'AppShell', 'Button', 'Card', 'Checkbox',
+  'Accordion', 'AdminShell', 'Alert', 'AlertDialog', 'AppShell', 'AttentionSurface', 'AuthShell', 'Button', 'Card', 'Checkbox',
   'DataTable', 'DatePicker', 'DropdownMenu', 'Empty', 'ErrorState', 'Field', 'FileInput',
-  'Header', 'IconButton', 'Input', 'LoadingSpinner', 'MediaGrid', 'Modal', 'PageHeader',
+  'DetailLayout', 'Eyebrow', 'FeedColumn', 'FeedColumns', 'FeedGrid', 'Header', 'IconButton', 'Input', 'LoadingSpinner', 'MediaGrid', 'Modal', 'PageFrame', 'PageHeader',
   'Progress', 'RadioGroup', 'RelationshipField', 'ResourceList', 'SchemaForm', 'Select',
   'Sheet', 'Skeleton', 'Slider', 'Switch', 'Tabs', 'Textarea', 'Toaster', 'Toggle'
 ];
