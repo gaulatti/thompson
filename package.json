@@ -99,6 +99,7 @@
     "storybook:ios": "npm run storybook:ios --workspace=@gaulatti/thompson-example",
     "storybook:android": "npm run storybook:android --workspace=@gaulatti/thompson-example",
     "storybook:export": "npm run storybook:export --workspace=@gaulatti/thompson-example",
+    "prepare": "npm run build",
     "prepack": "npm run check"
   },
   "peerDependencies": {
@@ -112,7 +113,7 @@
     "react-native-webview": ">=13 <14"
   },
   "devDependencies": {
-    "@gaulatti/bleecker": "file:../bleecker",
+    "@gaulatti/bleecker": "0.1.41",
     "@types/react": "^19.2.18",
     "react": "19.2.3",
     "react-dom": "19.2.3",

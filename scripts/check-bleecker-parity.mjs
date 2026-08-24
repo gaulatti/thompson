@@ -5,17 +5,33 @@ import ts from 'typescript';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const bleeckerRoot = path.resolve(root, '../bleecker');
-const bleeckerIndex = fs.readFileSync(path.join(bleeckerRoot, 'src/index.ts'), 'utf8');
+const siblingBleeckerRoot = path.resolve(root, '../bleecker');
+const installedBleeckerRoot = path.resolve(root, 'node_modules/@gaulatti/bleecker');
+const usesSibling = fs.existsSync(path.join(siblingBleeckerRoot, 'src/index.ts'));
+const bleeckerRoot = usesSibling ? siblingBleeckerRoot : installedBleeckerRoot;
+const bleeckerSourceDirectory = usesSibling ? 'src' : 'dist';
+const bleeckerIndexPath = path.join(
+  bleeckerRoot,
+  bleeckerSourceDirectory,
+  usesSibling ? 'index.ts' : 'index.d.ts'
+);
+
+if (!fs.existsSync(bleeckerIndexPath)) {
+  throw new Error(
+    'Bleecker parity requires either an adjacent Bleecker checkout or the pinned registry package'
+  );
+}
+
+const bleeckerIndex = fs.readFileSync(bleeckerIndexPath, 'utf8');
 
 const exclusions = new Set(['core', 'tokens', 'utils/cn', 'utils/hooks', 'theme/theme-script']);
 const publicModules = [...bleeckerIndex.matchAll(/from '\.\/([^']+)'/g)]
   .map((match) => match[1])
   .filter((value) => !exclusions.has(value));
 
-function sourceFor(repositoryRoot, modulePath) {
-  return ['tsx', 'ts']
-    .map((extension) => path.join(repositoryRoot, 'src', `${modulePath}.${extension}`))
+function sourceFor(repositoryRoot, sourceDirectory, modulePath) {
+  return ['tsx', 'ts', 'd.ts']
+    .map((extension) => path.join(repositoryRoot, sourceDirectory, `${modulePath}.${extension}`))
     .find((candidate) => fs.existsSync(candidate));
 }
 
@@ -43,8 +59,8 @@ const missingModules = [];
 const symbolMismatches = [];
 
 for (const modulePath of publicModules) {
-  const bleeckerSource = sourceFor(bleeckerRoot, modulePath);
-  const thompsonSource = sourceFor(root, modulePath);
+  const bleeckerSource = sourceFor(bleeckerRoot, bleeckerSourceDirectory, modulePath);
+  const thompsonSource = sourceFor(root, 'src', modulePath);
   if (!thompsonSource) {
     missingModules.push(modulePath);
     continue;
@@ -60,6 +76,9 @@ for (const modulePath of publicModules) {
 const pathCoverage = publicModules.length - missingModules.length;
 const symbolCoverage = publicModules.length - missingModules.length - symbolMismatches.length;
 console.log(`[check-bleecker-parity] Paths: ${pathCoverage}/${publicModules.length}. Public symbol sets: ${symbolCoverage}/${publicModules.length}.`);
+console.log(
+  `[check-bleecker-parity] Contract source: ${usesSibling ? 'adjacent checkout' : 'pinned registry package'}.`
+);
 
 if (missingModules.length) console.log(`[check-bleecker-parity] Missing modules: ${missingModules.join(', ')}`);
 for (const mismatch of symbolMismatches) {

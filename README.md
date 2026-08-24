@@ -14,6 +14,19 @@ The adjacent `ariston/matteotti` application is Thompson's native reference impl
 npm install @gaulatti/thompson @gaulatti/bleecker react react-native react-native-safe-area-context react-native-svg react-native-webview @react-native-community/datetimepicker @react-native-community/slider expo-font @expo-google-fonts/encode-sans @expo-google-fonts/libre-franklin
 ```
 
+Until Thompson is published to npm, consumers may pin an audited Git commit.
+The Git installation runs Thompson's `prepare` build and resolves Bleecker from
+the public npm registry, so it does not require a sibling repository or a
+checked-in package archive:
+
+```sh
+npm install github:gaulatti/thompson#<full-commit-sha>
+```
+
+Keep the full commit SHA in the consumer lockfile and update it deliberately
+after Thompson's checks pass. The installed package includes the generated
+JavaScript and declarations under `dist`.
+
 ### Load Thompson's fonts
 
 Thompson uses the same typography as Bleecker: Encode Sans for interface and display text, and Libre Franklin for secondary copy. React Native applications must load those faces before rendering the provider:
@@ -145,13 +158,24 @@ Use `AppShell` when bottom tabs are the appropriate information architecture:
 
 ## Development
 
-The adjacent Bleecker checkout supplies `@gaulatti/bleecker/core` and `@gaulatti/bleecker/tokens` during development. Thompson installs it as a packed local dependency so Bleecker's web-only dependency tree cannot leak a second React into Expo. Refresh the snapshot after changing Bleecker:
+Normal installs use the exact registry version of Bleecker recorded in
+`devDependencies`, which makes clean and Git-based builds reproducible. When an
+adjacent Bleecker checkout exists, `sync:bleecker` builds and installs that
+checkout as a packed local dependency so Bleecker's web-only dependency tree
+cannot leak a second React into Expo. Refresh the local snapshot after changing
+Bleecker:
 
 ```sh
 npm install
 npm run sync:bleecker
 npm run check
 ```
+
+Strict parity checks prefer the adjacent source checkout when it exists and
+otherwise compare Thompson with the declarations in the pinned registry
+package. Running `npm install` restores the registry dependency; run
+`npm run sync:bleecker` again whenever local cross-repository development is
+required.
 
 The rich-text editor uses the required native WebView peer:
 
