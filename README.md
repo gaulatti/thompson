@@ -199,6 +199,55 @@ Pass `articleComponents` to enable Auburndale-compatible article authoring. The 
 
 Run `npm run test:rich-text` to verify every component schema, cancellation/default behavior, native/WebView parity, and generated ESM file and directory imports.
 
+## Durable asynchronous workflow primitives
+
+Products such as Manzoni and Sonar need consistent, accessible presentation for
+offline state, a durable outbox, retries, partial success, conflicts, and the
+difference between work a server has **accepted** and work it has **delivered**.
+That recurring presentation lives in Thompson; the domain logic, persistence,
+networking, background jobs, and retry policy stay app-owned.
+
+```tsx
+import {
+  ConnectionBanner,
+  FreshnessStamp,
+  QueueSummaryBar,
+  QueueRow,
+  RetryAction,
+  PartialSuccessNotice,
+  ConflictChoice,
+  DeliveryStatus,
+  DurableQueuePanel
+} from '@gaulatti/thompson';
+```
+
+Every value and callback is controlled by the consumer. A queue item moves
+through `pending → active → retry-wait → failed → accepted → delivered`, plus
+`canceled` and `expired`; components never call `accepted` work `delivered`, and
+`canClaimDelivered(state)` enforces that rule for any consumer copy. Relative
+labels (`FreshnessStamp`, `RetryAction`) self-update from an internal clock but
+accept an explicit `now` for tests and fixtures. The only motion is the
+`active`-item indicator, which falls back to a static dot under the OS reduce-motion
+setting.
+
+```tsx
+<DurableQueuePanel
+  connection={connection}
+  asOf={lastSyncedAt}
+  items={outboxRows}
+  onReconnect={sync}
+  onRetry={retryItem}
+  onCancel={cancelItem}
+/>
+```
+
+Pure vocabulary helpers — `summarizeQueue`, `summarizeQueueLabel`,
+`formatFreshness`, `formatRetryCountdown`, `formatAttempt`,
+`summarizePartialSuccess` — are exported from `@gaulatti/thompson` and covered by
+`tests/durable-workflow-contract.test.mjs` (run with `npm run test:rich-text`).
+The `Patterns/Durable Workflow` Storybook group exercises every state in light,
+dark, dynamic type, and reduced-motion.
+
 ## Storybook and native preview
 
 The `example` workspace is a complete Expo application and navigable native component catalog. Its `AdminShell` menu opens real pages for typography, surfaces, buttons, forms, feedback, data display, overlays, navigation, charts, and production admin patterns.
