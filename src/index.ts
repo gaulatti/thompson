@@ -11,6 +11,8 @@ export * from './components/charts';
 export * from './components/controls';
 export * from './components/composites';
 export * from './components/data-table';
+export * from './components/durable-workflow';
+export * from './components/durable-workflow-contract';
 export * from './components/feedback';
 export * from './components/extras';
 export * from './components/eyebrow';
