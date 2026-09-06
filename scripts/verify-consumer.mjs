@@ -26,6 +26,7 @@ export function verifyConsumer(artifact) {
         '@gaulatti/thompson': `file:${absoluteArtifact}`,
         '@react-native-community/datetimepicker': '9.1.0',
         '@react-native-community/slider': '5.2.0',
+        '@types/react': '19.2.18',
         react: '19.2.3',
         'react-dom': '19.2.3',
         'react-native': '0.86.2',
