@@ -1,0 +1,133 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Exact semver tag to release from main
+        required: true
+        default: v0.1.0
+        type: string
+
+run-name: Release ${{ inputs.tag }} from ${{ github.sha }}
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    environment: npm-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Check out the exact release commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - name: Use the pinned release toolchain
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.15.0
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+      - name: Pin the OIDC-capable npm CLI
+        run: npm install --global npm@12.0.2 && test "$(npm --version)" = "12.0.2"
+      - name: Refuse a stale, mutable, or duplicate release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          version="$(node --input-type=module -e "import manifest from './package.json' with { type: 'json' }; process.stdout.write(manifest.version)")"
+          test "$RELEASE_TAG" = "v$version"
+          test -f "docs/release-notes/$RELEASE_TAG.md"
+          git fetch origin main --tags
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse origin/main)" = "$GITHUB_SHA"
+          test "$(gh api -H 'X-GitHub-Api-Version: 2026-03-10' "repos/$GITHUB_REPOSITORY/immutable-releases" --jq .enabled)" = "true"
+          if git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"; then
+            echo "Tag $RELEASE_TAG already exists" >&2
+            exit 1
+          fi
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG already exists" >&2
+            exit 1
+          fi
+          if npm view "@gaulatti/thompson@$version" version >/dev/null 2>&1; then
+            echo "npm version $version already exists" >&2
+            exit 1
+          fi
+      - name: Install from the lockfile
+        run: npm ci
+      - name: Run every release gate
+        run: |
+          npm run check
+          npm run check:package
+          npm run storybook:export
+      - name: Create and recheck the release artifact
+        id: artifact
+        run: |
+          set -euo pipefail
+          npm run release:pack
+          artifact="$(find .release-artifacts -maxdepth 1 -type f -name '*.tgz' -print -quit)"
+          test -n "$artifact"
+          node scripts/verify-consumer.mjs "$artifact"
+          filename="$(basename "$artifact")"
+          sha256="$(sha256sum "$artifact" | cut -d' ' -f1)"
+          integrity="sha512-$(openssl dgst -sha512 -binary "$artifact" | openssl base64 -A)"
+          printf '%s  %s\n' "$sha256" "$filename" > .release-artifacts/SHA256SUMS
+          echo "path=$artifact" >> "$GITHUB_OUTPUT"
+          echo "filename=$filename" >> "$GITHUB_OUTPUT"
+          echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
+          echo "integrity=$integrity" >> "$GITHUB_OUTPUT"
+      - name: Stage the exact artifact in a draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          ARTIFACT: ${{ steps.artifact.outputs.path }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            "$ARTIFACT#npm package" \
+            ".release-artifacts/SHA256SUMS#SHA-256 checksums" \
+            --draft \
+            --target "$GITHUB_SHA" \
+            --title "$RELEASE_TAG" \
+            --notes-file "docs/release-notes/$RELEASE_TAG.md"
+      - name: Publish the staged artifact to npm
+        env:
+          # NPM_TOKEN is a protected bootstrap secret for v0.1.0 only. Once the
+          # package exists, npm trusted publishing uses this job's OIDC token.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          ARTIFACT: ${{ steps.artifact.outputs.path }}
+        run: npm publish "$ARTIFACT" --access public --provenance
+      - name: Publish and lock the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: gh release edit "$RELEASE_TAG" --draft=false --latest
+      - name: Verify npm, tag, release, commit, and artifact identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          EXPECTED_FILENAME: ${{ steps.artifact.outputs.filename }}
+          EXPECTED_INTEGRITY: ${{ steps.artifact.outputs.integrity }}
+          EXPECTED_SHA256: ${{ steps.artifact.outputs.sha256 }}
+        run: |
+          set -euo pipefail
+          version="${RELEASE_TAG#v}"
+          registry_integrity=''
+          for attempt in 1 2 3 4 5; do
+            registry_integrity="$(npm view "@gaulatti/thompson@$version" dist.integrity 2>/dev/null || true)"
+            test "$registry_integrity" = "$EXPECTED_INTEGRITY" && break
+            sleep 5
+          done
+          test "$registry_integrity" = "$EXPECTED_INTEGRITY"
+          git fetch origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+          test "$(git rev-list -n 1 "$RELEASE_TAG")" = "$GITHUB_SHA"
+          release="$(gh api -H 'X-GitHub-Api-Version: 2026-03-10' "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG")"
+          test "$(jq -r .target_commitish <<<"$release")" = "$GITHUB_SHA"
+          test "$(jq -r .immutable <<<"$release")" = "true"
+          test "$(jq -r --arg name "$EXPECTED_FILENAME" '.assets[] | select(.name == $name) | .digest' <<<"$release")" = "sha256:$EXPECTED_SHA256"

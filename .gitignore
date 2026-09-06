@@ -3,6 +3,8 @@ dist/
 *.tgz
 .DS_Store
 .expo/
+.release-artifacts/
 example/.storybook-build/
 example/.expo-build/
+example/.expo/
 example/.rnstorybook/storybook.requires.ts
