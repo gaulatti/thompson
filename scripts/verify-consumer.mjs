@@ -27,6 +27,7 @@ export function verifyConsumer(artifact) {
         '@react-native-community/datetimepicker': '9.1.0',
         '@react-native-community/slider': '5.2.0',
         react: '19.2.3',
+        'react-dom': '19.2.3',
         'react-native': '0.86.2',
         'react-native-safe-area-context': '5.7.0',
         'react-native-svg': '15.15.4',
