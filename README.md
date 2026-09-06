@@ -14,18 +14,19 @@ The adjacent `ariston/matteotti` application is Thompson's native reference impl
 npm install @gaulatti/thompson @gaulatti/bleecker react react-native react-native-safe-area-context react-native-svg react-native-webview @react-native-community/datetimepicker @react-native-community/slider expo-font @expo-google-fonts/encode-sans @expo-google-fonts/libre-franklin
 ```
 
-Until Thompson is published to npm, consumers may pin an audited Git commit.
-The Git installation runs Thompson's `prepare` build and resolves Bleecker from
-the public npm registry, so it does not require a sibling repository or a
-checked-in package archive:
+After the `v0.1.0` release workflow completes, install the immutable registry
+version explicitly:
 
 ```sh
-npm install github:gaulatti/thompson#<full-commit-sha>
+npm install @gaulatti/thompson@0.1.0
 ```
 
-Keep the full commit SHA in the consumer lockfile and update it deliberately
-after Thompson's checks pass. The installed package includes the generated
-JavaScript and declarations under `dist`.
+Commit the resulting lockfile and update the version deliberately after
+Thompson's release checks pass. Production consumers must not use branch names,
+moving Git references, sibling checkouts, or locally packed archives. The
+installed package includes the generated JavaScript and declarations under
+`dist`. See [the release guide](docs/RELEASING.md) for compatibility, provenance,
+and rollback policy.
 
 ### Load Thompson's fonts
 
