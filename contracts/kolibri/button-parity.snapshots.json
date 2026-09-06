@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "snapshots": [
+    {
+      "target": "ios/light/compact",
+      "platform": "ios",
+      "theme": "light",
+      "density": "compact",
+      "component": "Button",
+      "props": { "accessibilityLabel": "Confirm", "accessibilityRole": "button", "size": "sm", "variant": "primary" },
+      "tokens": { "background": "theme.colors.sea", "foreground": "#ffffff", "radius": "radii.button" },
+      "states": {
+        "default": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "default", "focusOwner": null },
+        "pressed": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "pressed", "focusOwner": null },
+        "disabled": { "accessibilityState": { "busy": false, "disabled": true }, "activation": "blocked", "visualState": "disabled", "focusOwner": null },
+        "loading": { "accessibilityState": { "busy": true, "disabled": true }, "activation": "blocked", "visualState": "loading", "focusOwner": null },
+        "focused": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "focused", "focusOwner": "native-os" }
+      }
+    },
+    {
+      "target": "ios/light/regular",
+      "platform": "ios",
+      "theme": "light",
+      "density": "regular",
+      "component": "Button",
+      "props": { "accessibilityLabel": "Confirm", "accessibilityRole": "button", "size": "md", "variant": "primary" },
+      "tokens": { "background": "theme.colors.sea", "foreground": "#ffffff", "radius": "radii.button" },
+      "states": {
+        "default": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "default", "focusOwner": null },
+        "pressed": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "pressed", "focusOwner": null },
+        "disabled": { "accessibilityState": { "busy": false, "disabled": true }, "activation": "blocked", "visualState": "disabled", "focusOwner": null },
+        "loading": { "accessibilityState": { "busy": true, "disabled": true }, "activation": "blocked", "visualState": "loading", "focusOwner": null },
+        "focused": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "focused", "focusOwner": "native-os" }
+      }
+    },
+    {
+      "target": "ios/dark/compact",
+      "platform": "ios",
+      "theme": "dark",
+      "density": "compact",
+      "component": "Button",
+      "props": { "accessibilityLabel": "Confirm", "accessibilityRole": "button", "size": "sm", "variant": "primary" },
+      "tokens": { "background": "theme.colors.sea", "foreground": "theme.colors.deepSea", "radius": "radii.button" },
+      "states": {
+        "default": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "default", "focusOwner": null },
+        "pressed": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "pressed", "focusOwner": null },
+        "disabled": { "accessibilityState": { "busy": false, "disabled": true }, "activation": "blocked", "visualState": "disabled", "focusOwner": null },
+        "loading": { "accessibilityState": { "busy": true, "disabled": true }, "activation": "blocked", "visualState": "loading", "focusOwner": null },
+        "focused": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "focused", "focusOwner": "native-os" }
+      }
+    },
+    {
+      "target": "ios/dark/regular",
+      "platform": "ios",
+      "theme": "dark",
+      "density": "regular",
+      "component": "Button",
+      "props": { "accessibilityLabel": "Confirm", "accessibilityRole": "button", "size": "md", "variant": "primary" },
+      "tokens": { "background": "theme.colors.sea", "foreground": "theme.colors.deepSea", "radius": "radii.button" },
+      "states": {
+        "default": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "default", "focusOwner": null },
+        "pressed": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "pressed", "focusOwner": null },
+        "disabled": { "accessibilityState": { "busy": false, "disabled": true }, "activation": "blocked", "visualState": "disabled", "focusOwner": null },
+        "loading": { "accessibilityState": { "busy": true, "disabled": true }, "activation": "blocked", "visualState": "loading", "focusOwner": null },
+        "focused": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "focused", "focusOwner": "native-os" }
+      }
+    },
+    {
+      "target": "android/light/compact",
+      "platform": "android",
+      "theme": "light",
+      "density": "compact",
+      "component": "Button",
+      "props": { "accessibilityLabel": "Confirm", "accessibilityRole": "button", "size": "sm", "variant": "primary" },
+      "tokens": { "background": "theme.colors.sea", "foreground": "#ffffff", "radius": "radii.button" },
+      "states": {
+        "default": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "default", "focusOwner": null },
+        "pressed": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "pressed", "focusOwner": null },
+        "disabled": { "accessibilityState": { "busy": false, "disabled": true }, "activation": "blocked", "visualState": "disabled", "focusOwner": null },
+        "loading": { "accessibilityState": { "busy": true, "disabled": true }, "activation": "blocked", "visualState": "loading", "focusOwner": null },
+        "focused": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "focused", "focusOwner": "native-os" }
+      }
+    },
+    {
+      "target": "android/light/regular",
+      "platform": "android",
+      "theme": "light",
+      "density": "regular",
+      "component": "Button",
+      "props": { "accessibilityLabel": "Confirm", "accessibilityRole": "button", "size": "md", "variant": "primary" },
+      "tokens": { "background": "theme.colors.sea", "foreground": "#ffffff", "radius": "radii.button" },
+      "states": {
+        "default": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "default", "focusOwner": null },
+        "pressed": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "pressed", "focusOwner": null },
+        "disabled": { "accessibilityState": { "busy": false, "disabled": true }, "activation": "blocked", "visualState": "disabled", "focusOwner": null },
+        "loading": { "accessibilityState": { "busy": true, "disabled": true }, "activation": "blocked", "visualState": "loading", "focusOwner": null },
+        "focused": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "focused", "focusOwner": "native-os" }
+      }
+    },
+    {
+      "target": "android/dark/compact",
+      "platform": "android",
+      "theme": "dark",
+      "density": "compact",
+      "component": "Button",
+      "props": { "accessibilityLabel": "Confirm", "accessibilityRole": "button", "size": "sm", "variant": "primary" },
+      "tokens": { "background": "theme.colors.sea", "foreground": "theme.colors.deepSea", "radius": "radii.button" },
+      "states": {
+        "default": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "default", "focusOwner": null },
+        "pressed": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "pressed", "focusOwner": null },
+        "disabled": { "accessibilityState": { "busy": false, "disabled": true }, "activation": "blocked", "visualState": "disabled", "focusOwner": null },
+        "loading": { "accessibilityState": { "busy": true, "disabled": true }, "activation": "blocked", "visualState": "loading", "focusOwner": null },
+        "focused": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "focused", "focusOwner": "native-os" }
+      }
+    },
+    {
+      "target": "android/dark/regular",
+      "platform": "android",
+      "theme": "dark",
+      "density": "regular",
+      "component": "Button",
+      "props": { "accessibilityLabel": "Confirm", "accessibilityRole": "button", "size": "md", "variant": "primary" },
+      "tokens": { "background": "theme.colors.sea", "foreground": "theme.colors.deepSea", "radius": "radii.button" },
+      "states": {
+        "default": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "default", "focusOwner": null },
+        "pressed": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "pressed", "focusOwner": null },
+        "disabled": { "accessibilityState": { "busy": false, "disabled": true }, "activation": "blocked", "visualState": "disabled", "focusOwner": null },
+        "loading": { "accessibilityState": { "busy": true, "disabled": true }, "activation": "blocked", "visualState": "loading", "focusOwner": null },
+        "focused": { "accessibilityState": { "busy": false, "disabled": false }, "activation": "emit:activate", "visualState": "focused", "focusOwner": "native-os" }
+      }
+    }
+  ]
+}

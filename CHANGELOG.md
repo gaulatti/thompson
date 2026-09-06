@@ -10,3 +10,4 @@ All notable changes to Thompson are recorded here. Thompson follows Semantic Ver
 - Expo component gallery and on-device Storybook coverage.
 - Strict Bleecker parity, contract, type, build, test, story, package-content, and clean-consumer gates.
 - Reproducible release workflow with provenance, checksummed npm artifact, and immutable GitHub release enforcement.
+- Sanitized Kolibri Button consumer fixture with deterministic native parity snapshots and fail-closed contract checks.
