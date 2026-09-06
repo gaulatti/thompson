@@ -126,6 +126,12 @@ The Storybook `Parity/Native layouts` group includes phone/tablet, compact/wide,
 
 `npm run check:parity:strict` compares Thompson against the adjacent Bleecker public barrel and fails unless every Bleecker module exists and every Bleecker public symbol is exported by its native counterpart. Native-only additions are allowed. The normal `npm run check` includes this strict assertion, plus a Storybook gate for production-critical components.
 
+## Kolibri consumer parity
+
+Thompson's bounded Kolibri proof uses a sanitized, consumer-owned Button fixture rather than copying private producer material into this public repository. It pins the landed private release by commit and digest, classifies every selected part/state/token/behavior, and checks deterministic iOS/Android theme-and-size snapshots while the existing Thompson `Button` retains native API, input, focus, styling, and accessibility ownership.
+
+Run `npm run check:kolibri` and inspect the `Parity/Kolibri Button contract` native Storybook fixture. The [decision report](docs/KOLIBRI_PARITY.md) documents exact mappings, adaptations, platform exceptions, unsupported behavior, provenance, and the live private-integration boundary.
+
 ## Synchronization contract
 
 Portable variant sets, sizes, theme modes, formatting helpers, and design tokens come from Bleecker. `npm run check:contracts` executes against Bleecker's built leaf exports and fails when Thompson's expected contract drifts. Native-only interaction props such as `onPress` and `onValueChange` remain available alongside shared semantic aliases where useful.

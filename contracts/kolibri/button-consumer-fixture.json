@@ -1,0 +1,39 @@
+{
+  "fixtureFormat": "thompson-kolibri-consumer-fixture@1",
+  "provenance": {
+    "kind": "sanitized-consumer-fake",
+    "privateMaterialCopied": false,
+    "upstream": {
+      "repository": "gaulatti/kolibri",
+      "visibility": "private",
+      "releaseVersion": "0.1.0",
+      "mergeCommit": "f14a631a001f867e208be6053ac07df32fda4dca",
+      "manifestSha256": "aec1a74fb557ab0a5d254b5ac8d98306e552dc88cdb6ebeeb6f98d1460cfe134",
+      "representativeArtifactSha256": "bcfe71af11ba80eb7a7bcf28fd3c1489fe1167bb8451549d5cb3bd74c17c4c6e"
+    }
+  },
+  "component": {
+    "id": "thompson.action",
+    "family": "Button",
+    "kind": "atom",
+    "label": "Confirm",
+    "parts": [
+      { "id": "root", "semanticRole": "button" },
+      { "id": "label", "semanticRole": "text" }
+    ],
+    "tokens": [
+      { "id": "action.background", "role": "background" },
+      { "id": "action.foreground", "role": "foreground" },
+      { "id": "control.radius", "role": "radius" }
+    ],
+    "variants": ["primary"],
+    "states": ["default", "pressed", "disabled", "loading", "focused", "hover"],
+    "events": [
+      { "name": "press", "actionId": "activate" }
+    ],
+    "actions": [
+      { "id": "activate", "type": "emit" }
+    ],
+    "assets": []
+  }
+}

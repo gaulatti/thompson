@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "fixtureSha256": "bffcbc4978a2bf29dcf20b10eba3cdec4b93600bbd508bd58ebc172536d18da2",
+  "targetPublicApi": "@gaulatti/thompson Button",
+  "classifications": [
+    { "source": "component.id", "classification": "adapted", "target": "consumer fixture identifier only", "rationale": "Generated identifiers do not become Thompson public exports or native test IDs." },
+    { "source": "component.family", "classification": "exact", "target": "Button", "rationale": "The existing Thompson public component remains the owner." },
+    { "source": "component.kind", "classification": "exact", "target": "native control atom", "rationale": "The fixture and native implementation are both atomic controls." },
+    { "source": "component.label", "classification": "adapted", "target": "Button children and accessibilityLabel", "rationale": "Native visible and assistive labels share the consumer-owned string." },
+    { "source": "component.parts.root", "classification": "exact", "target": "Pressable accessibilityRole=button", "rationale": "The semantic root stays a button while React Native owns the primitive." },
+    { "source": "component.parts.label", "classification": "adapted", "target": "React Native Text child", "rationale": "React Native has no DOM span; Thompson owns native text rendering." },
+    { "source": "component.tokens.action.background", "classification": "adapted", "target": "theme.colors.sea", "rationale": "The semantic background role maps to Thompson's existing theme token." },
+    { "source": "component.tokens.action.foreground", "classification": "adapted", "target": "light #ffffff; dark theme.colors.deepSea", "rationale": "Thompson preserves contrast with a theme-specific native foreground." },
+    { "source": "component.tokens.control.radius", "classification": "exact", "target": "radii.button", "rationale": "The existing portable button radius is authoritative." },
+    { "source": "component.variants.primary", "classification": "exact", "target": "Button variant=primary", "rationale": "The public Thompson variant already expresses the selected intent." },
+    { "source": "component.states.default", "classification": "exact", "target": "enabled Button", "rationale": "No native adaptation is required for the default state." },
+    { "source": "component.states.pressed", "classification": "adapted", "target": "Pressable pressed opacity and scale", "rationale": "React Native derives press state from the input system instead of accepting generated state." },
+    { "source": "component.states.disabled", "classification": "adapted", "target": "disabled plus accessibilityState.disabled", "rationale": "Thompson blocks input and publishes the native accessibility state." },
+    { "source": "component.states.loading", "classification": "adapted", "target": "loading plus accessibilityState.busy", "rationale": "Thompson owns the native activity indicator and blocks duplicate activation." },
+    { "source": "component.states.focused", "classification": "platform-exception", "target": "OS accessibility focus on Pressable", "rationale": "iOS and Android focus services own native focus; no DOM focus ring or generated focus command is installed." },
+    { "source": "component.states.hover", "classification": "unsupported", "target": "none for the touch-first iOS/Android baseline", "rationale": "Hover is not treated as a portable mobile state and cannot silently become press or focus." },
+    { "source": "component.events.press", "classification": "adapted", "target": "Button onPress", "rationale": "The native input event invokes a Thompson-owned callback." },
+    { "source": "component.actions.activate", "classification": "adapted", "target": "emit consumer action", "rationale": "The application owns routing and side effects; the design contract only names intent." },
+    { "source": "component.assets", "classification": "exact", "target": "no asset", "rationale": "The selected fixture does not require an image, icon, or font payload." }
+  ],
+  "matrix": {
+    "platforms": ["ios", "android"],
+    "themes": ["light", "dark"],
+    "sizes": ["compact", "regular"],
+    "states": ["default", "pressed", "disabled", "loading", "focused"]
+  },
+  "adapters": {
+    "sizes": { "compact": "sm", "regular": "md" },
+    "foregroundTokens": { "light": "#ffffff", "dark": "theme.colors.deepSea" },
+    "event": { "source": "press", "target": "onPress", "actionId": "activate" }
+  }
+}
