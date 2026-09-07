@@ -24,9 +24,10 @@ npm install @gaulatti/thompson@0.1.0
 Commit the resulting lockfile and update the version deliberately after
 Thompson's release checks pass. Production consumers must not use branch names,
 moving Git references, sibling checkouts, or locally packed archives. The
-installed package includes the generated JavaScript and declarations under
-`dist`. See [the release guide](docs/RELEASING.md) for compatibility, provenance,
-and rollback policy.
+installed lockfile must point at the exact `registry.npmjs.org` tarball and its
+recorded integrity. The package includes the generated JavaScript and declarations
+under `dist`. See [the release guide](docs/RELEASING.md) for the automated clean
+consumer check, compatibility, provenance, and rollback policy.
 
 ### Load Thompson's fonts
 

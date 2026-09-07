@@ -31,8 +31,12 @@ test('release workflow preserves one artifact and exact commit across npm and Gi
 
   const draft = workflow.indexOf('gh release create');
   const npmPublish = workflow.indexOf('npm publish');
+  const registryConsumer = workflow.indexOf('verify-registry-consumer.mjs');
   const publishRelease = workflow.indexOf('gh release edit');
-  assert.ok(draft > -1 && draft < npmPublish && npmPublish < publishRelease, 'release order must be draft, npm, immutable release');
+  assert.ok(
+    draft > -1 && draft < npmPublish && npmPublish < registryConsumer && registryConsumer < publishRelease,
+    'release order must be draft, npm, clean registry consumer, immutable release'
+  );
 
   const actionRefs = [...workflow.matchAll(/uses:\s+[^@\s]+@([^\s]+)/g)].map((match) => match[1]);
   assert.ok(actionRefs.length > 0);
@@ -44,6 +48,8 @@ test('release operations and rollback are documented', () => {
   for (const boundary of ['Semantic versioning', 'Compatibility', 'Trusted publishing', 'Immutable releases', 'Rollback']) {
     assert.ok(guide.includes(boundary), `release guide is missing ${boundary}`);
   }
+  assert.match(guide, /npm deprecate @gaulatti\/thompson@<version>/);
+  assert.match(guide, /do not unpublish/);
 });
 
 test('package verification includes a literal dry run and deterministic real packs', () => {
@@ -51,4 +57,34 @@ test('package verification includes a literal dry run and deterministic real pac
   assert.match(verifier, /--dry-run/);
   assert.match(verifier, /successive package tarballs differ/);
   assert.match(verifier, /export target is missing from package/);
+});
+
+test('registry consumer rejects non-registry and mismatched lock resolutions', async () => {
+  const { assertRegistryResolution } = await import('../scripts/verify-consumer.mjs');
+  const version = '0.1.0';
+  const integrity = `sha512-${Buffer.from('expected Thompson artifact').toString('base64')}`;
+  const valid = {
+    version,
+    resolved: `https://registry.npmjs.org/@gaulatti/thompson/-/thompson-${version}.tgz`,
+    integrity
+  };
+
+  assert.doesNotThrow(() => assertRegistryResolution(valid, version, integrity));
+  assert.throws(
+    () => assertRegistryResolution({ ...valid, resolved: 'file:../thompson.tgz' }, version, integrity),
+    /did not use HTTPS/
+  );
+  assert.throws(
+    () => assertRegistryResolution({ ...valid, resolved: 'https://github.com/gaulatti/thompson/archive/main.tar.gz' }, version, integrity),
+    /public npm registry/
+  );
+  assert.throws(
+    () => assertRegistryResolution({ ...valid, version: '0.1.1' }, version, integrity),
+    /different Thompson version/
+  );
+  assert.throws(
+    () => assertRegistryResolution({ ...valid, integrity: `sha512-${Buffer.from('other artifact').toString('base64')}` }, version, integrity),
+    /different Thompson artifact/
+  );
+  assert.throws(() => assertRegistryResolution(valid, '^0.1.0', integrity), /exact semver/);
 });

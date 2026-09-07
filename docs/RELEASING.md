@@ -20,17 +20,19 @@ Pull requests and `main` run the same lockfile install, typecheck, example typec
 
 `scripts/verify-package.mjs` rejects development, test, workflow, agent, environment, and archive files; asserts every declared export target; and requires byte-identical tarballs from successive packs. `scripts/verify-consumer.mjs` installs the tarball in a temporary project, typechecks a representative provider/card/button tree, and executes a public utility import from the installed artifact.
 
+After publication, `scripts/verify-registry-consumer.mjs <exact-version> <sha512-integrity>` repeats that proof in a newly created project whose registry is explicitly `https://registry.npmjs.org/`. It rejects ranges and tags, then checks the generated lockfile for the exact version, public-registry tarball URL, and expected integrity before using the installed package. The verifier typechecks representative component use, executes a public utility, and exports a minimal iOS Expo bundle from the installed package. The release remains a draft until this clean consumer succeeds; no workspace, sibling checkout, local tarball, Git URL, or GitHub archive can satisfy the check.
+
 ## Protected release setup
 
 Before the first release:
 
-1. Protect `main` with a ruleset that requires the `CI / verify` check and a pull request before merge.
+1. Protect `main` with a rule that requires the strict `verify` status-check context and a pull request before merge, dismisses stale reviews, resolves conversations, applies to administrators, and blocks force pushes and deletion.
 2. In the repository's release settings, enable **Immutable releases**. The workflow checks the repository API and stops before packing if this is false.
-3. Create the GitHub environment `npm-release`, restrict it to `main`, and require a maintainer approval. The release job cannot run outside that environment.
+3. Create the GitHub environment `npm-release`, restrict it to the exact `main` branch, and require a maintainer approval. The release job cannot run outside that environment.
 4. Because npm trusted publishers can only be configured from an existing package's settings, create a short-lived granular npm token for the first `@gaulatti/thompson` publish. Store it only as the environment secret `NPM_TOKEN`; never add it to repository secrets or files.
 5. Merge the release commit after CI passes, then manually dispatch `Release` from `main` with the exact `v<package version>` tag.
 
-The workflow refuses a branch SHA, a stale `main`, a mismatched tag/version, disabled GitHub release immutability, or an existing tag, GitHub release, or npm version. It creates one tarball and checksum, attaches both to a draft GitHub release, publishes that exact tarball to npm with provenance, then publishes the GitHub release. Publishing locks its tag and assets.
+The workflow refuses a branch SHA, a stale `main`, a mismatched tag/version, disabled GitHub release immutability, or an existing tag, GitHub release, or npm version. It creates one tarball and checksum, attaches both to a draft GitHub release, publishes that exact tarball to npm with provenance, verifies the public-registry artifact from a clean consumer, then publishes the GitHub release. Publishing locks its tag and assets.
 
 ## Trusted publishing
 
