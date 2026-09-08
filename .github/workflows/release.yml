@@ -103,6 +103,21 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           ARTIFACT: ${{ steps.artifact.outputs.path }}
         run: npm publish "$ARTIFACT" --access public --provenance
+      - name: Verify a clean public-registry consumer
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          EXPECTED_INTEGRITY: ${{ steps.artifact.outputs.integrity }}
+        run: |
+          set -euo pipefail
+          version="${RELEASE_TAG#v}"
+          registry_integrity=''
+          for attempt in 1 2 3 4 5; do
+            registry_integrity="$(npm view "@gaulatti/thompson@$version" dist.integrity 2>/dev/null || true)"
+            test "$registry_integrity" = "$EXPECTED_INTEGRITY" && break
+            sleep 5
+          done
+          test "$registry_integrity" = "$EXPECTED_INTEGRITY"
+          node scripts/verify-registry-consumer.mjs "$version" "$EXPECTED_INTEGRITY"
       - name: Publish and lock the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
