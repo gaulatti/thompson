@@ -8,3 +8,6 @@ example/.storybook-build/
 example/.expo-build/
 example/.expo/
 example/.rnstorybook/storybook.requires.ts
+
+# test coverage output
+coverage/
