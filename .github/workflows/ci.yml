@@ -111,7 +111,7 @@ jobs:
     needs: [unit, build, resolve-clouseau]
     if: always()
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 20
     env:
       CLOUSEAU_ENGINE_SHA: ${{ needs.resolve-clouseau.outputs.sha }}
       CLOUSEAU_ENGINE_DIGEST: ${{ needs.resolve-clouseau.outputs.digest }}
@@ -127,6 +127,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: *verify-code
         with:
+          fetch-depth: 0
           persist-credentials: false
       - name: Check out this run frozen Clouseau engine
         if: *verify-code
@@ -136,6 +137,45 @@ jobs:
           ref: ${{ needs.resolve-clouseau.outputs.sha || '0000000000000000000000000000000000000000' }}
           path: .clouseau-ci
           persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: *verify-code
+        with:
+          node-version: 22.22.2
+          package-manager-cache: false
+      - name: Use the lockfile's npm version
+        if: *verify-code
+        run: npm install --global npm@10.9.3 && test "$(npm --version)" = "10.9.3"
+      - name: Select the accepted base revision and its protected configuration
+        if: *verify-code
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          # An empty base (no PR base, new branch, manual run) leaves the stricter exact 100% gate in force.
+          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]]; then
+            echo "COVERAGE_BASE_SHA=" >> "$GITHUB_ENV"
+            cp .github/clouseau.json "$RUNNER_TEMP/clouseau-base.json"
+            exit 0
+          fi
+          git cat-file -e "$BASE_SHA^{commit}"
+          echo "COVERAGE_BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
+          # The base revision's file is authoritative; only the initial installation, whose base has none, reads this revision's.
+          if git cat-file -e "$BASE_SHA:.github/clouseau.json" 2>/dev/null; then
+            git show "$BASE_SHA:.github/clouseau.json" > "$RUNNER_TEMP/clouseau-base.json"
+          else
+            cp .github/clouseau.json "$RUNNER_TEMP/clouseau-base.json"
+          fi
+      - name: Measure the base revision's native coverage baseline
+        if: *verify-code
+        env:
+          CLOUSEAU_ROOT: ${{ github.workspace }}/.clouseau-ci
+        run: |
+          # The baseline is measured by running the base revision's own tests, never this pull request's code.
+          if [[ -z "$COVERAGE_BASE_SHA" ]]; then exit 0; fi
+          git worktree add --detach "$RUNNER_TEMP/base" "$COVERAGE_BASE_SHA"
+          cd "$RUNNER_TEMP/base"
+          npm ci
+          npm run test:coverage
+          node "$CLOUSEAU_ROOT/bin/coverage-gate.cjs" totals coverage/coverage-final.json src istanbul > "$RUNNER_TEMP/baseline.json"
       - name: Load this run's native coverage report
         if: *verify-code
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -150,6 +190,9 @@ jobs:
           coverage-format: istanbul
           coverage-report: coverage/coverage-final.json
           source-directory: src
+          config: ${{ runner.temp }}/clouseau-base.json
+          coverage-base-ref: ${{ env.COVERAGE_BASE_SHA }}
+          coverage-baseline: ${{ runner.temp }}/baseline.json
       - name: Require workflow tests execution
         if: *verify-code
         env:
