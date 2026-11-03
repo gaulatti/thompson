@@ -11,3 +11,6 @@ example/.rnstorybook/storybook.requires.ts
 
 # test coverage output
 coverage/
+.clouseau-ci
+.clouseau-review
+.github/tests/node_modules
