@@ -16,31 +16,19 @@ test('CI enforces the complete repository and package gates with pinned actions'
   assert.ok(actionRefs.every((reference) => /^[a-f0-9]{40}$/.test(reference)), 'CI actions must use full commit SHAs');
 });
 
-test('release workflow preserves one artifact and exact commit across npm and GitHub', () => {
-  const workflow = read('.github/workflows/release.yml');
-  assert.match(workflow, /workflow_dispatch:/);
-  assert.match(workflow, /environment:\s+npm-release/);
+test('publish workflow releases from a v* tag like the other gaulatti packages', () => {
+  const workflow = read('.github/workflows/publish.yml');
+  assert.match(workflow, /tags:\s*\n\s*- 'v\*'/);
+  assert.match(workflow, /environment:\s+thompson/);
   assert.match(workflow, /id-token:\s+write/);
-  assert.match(workflow, /contents:\s+write/);
-  assert.match(workflow, /NODE_AUTH_TOKEN:\s+\$\{\{ secrets\.NPM_TOKEN \}\}/);
-  assert.equal([...workflow.matchAll(/secrets\./g)].length, 1, 'only the protected bootstrap token is allowed');
-  assert.match(workflow, /immutable-releases/);
-  assert.match(workflow, /--target "\$GITHUB_SHA"/);
+  assert.match(workflow, /npm ci/);
   assert.match(workflow, /npm run check:package/);
-  assert.match(workflow, /npm run storybook:export/);
-
-  const draft = workflow.indexOf('gh release create');
-  const npmPublish = workflow.indexOf('npm publish');
-  const registryConsumer = workflow.indexOf('verify-registry-consumer.mjs');
-  const publishRelease = workflow.indexOf('gh release edit');
-  assert.ok(
-    draft > -1 && draft < npmPublish && npmPublish < registryConsumer && registryConsumer < publishRelease,
-    'release order must be draft, npm, clean registry consumer, immutable release'
-  );
+  assert.match(workflow, /npm publish --access public --provenance/);
+  assert.equal([...workflow.matchAll(/secrets\./g)].length, 1, 'only the first-publish bootstrap token is allowed');
 
   const actionRefs = [...workflow.matchAll(/uses:\s+[^@\s]+@([^\s]+)/g)].map((match) => match[1]);
   assert.ok(actionRefs.length > 0);
-  assert.ok(actionRefs.every((reference) => /^[a-f0-9]{40}$/.test(reference)), 'release actions must use full commit SHAs');
+  assert.ok(actionRefs.every((reference) => /^[a-f0-9]{40}$/.test(reference)), 'publish actions must use full commit SHAs');
 });
 
 test('release operations and rollback are documented', () => {

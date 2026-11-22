@@ -63,7 +63,7 @@ function assertExportTargets(manifest, files) {
 function assertContents(metadata, manifest) {
   const files = metadata.files ?? [];
   const paths = files.map(({ path: file }) => file);
-  const allowed = /^(?:CHANGELOG\.md|README\.md|package\.json|dist\/|src\/)/;
+  const allowed = /^(?:CHANGELOG\.md|LICENSE|README\.md|package\.json|dist\/|src\/)/;
   const forbidden = /^(?:\.agents\/|\.github\/|example\/|scripts\/|tests\/)|(?:^|\/)\.env(?:\.|$)|\.tgz$/;
 
   assert.ok(paths.length > 0, 'package is empty');
@@ -77,7 +77,7 @@ function assertContents(metadata, manifest) {
     [],
     'package contains a forbidden development or secret path'
   );
-  for (const required of ['CHANGELOG.md', 'README.md', 'package.json', 'dist/index.js', 'dist/index.d.ts']) {
+  for (const required of ['CHANGELOG.md', 'LICENSE', 'README.md', 'package.json', 'dist/index.js', 'dist/index.d.ts']) {
     assert.ok(paths.includes(required), `package is missing ${required}`);
   }
   assertExportTargets(manifest, files);
