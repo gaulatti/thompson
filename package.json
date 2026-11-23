@@ -2,6 +2,7 @@
   "name": "@gaulatti/thompson",
   "version": "0.1.0",
   "description": "React Native port of Bleecker. If you know both, you're in the Red Lion.",
+  "license": "MIT",
   "author": {
     "name": "Javier Godoy",
     "email": "jack@gaulatti.com",

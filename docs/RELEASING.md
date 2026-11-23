@@ -16,48 +16,41 @@ The Expo version is the verified gallery and Storybook environment, not a peer d
 
 ## Release gates
 
-Pull requests and `main` run the same lockfile install, typecheck, example typecheck, build, Node tests, Bleecker contract checks, strict parity, Storybook coverage, deterministic package check, isolated consumer install/typecheck/runtime import, and native Storybook export. The release workflow repeats every gate and packages twice before it is allowed to publish.
+Pull requests and `main` run the same lockfile install, typecheck, example typecheck, build, Node tests, Bleecker contract checks, strict parity, Storybook coverage, deterministic package check, isolated consumer install/typecheck/runtime import, and native Storybook export. Publishing repeats the package check, and `prepack` runs `npm run check` again before the tarball is built.
 
 `scripts/verify-package.mjs` rejects development, test, workflow, agent, environment, and archive files; asserts every declared export target; and requires byte-identical tarballs from successive packs. `scripts/verify-consumer.mjs` installs the tarball in a temporary project, typechecks a representative provider/card/button tree, and executes a public utility import from the installed artifact.
 
-After publication, `scripts/verify-registry-consumer.mjs <exact-version> <sha512-integrity>` repeats that proof in a newly created project whose registry is explicitly `https://registry.npmjs.org/`. It rejects ranges and tags, then checks the generated lockfile for the exact version, public-registry tarball URL, and expected integrity before using the installed package. The verifier typechecks representative component use, executes a public utility, and exports a minimal iOS Expo bundle from the installed package. The release remains a draft until this clean consumer succeeds; no workspace, sibling checkout, local tarball, Git URL, or GitHub archive can satisfy the check.
+After publication, `scripts/verify-registry-consumer.mjs <exact-version> <sha512-integrity>` can repeat that proof from a clean project that resolves the package from `https://registry.npmjs.org/` only.
 
-## Protected release setup
+## How to release
 
-Before the first release:
+Thompson releases the same way as Bleecker, Brokaw and Giorgia:
 
-1. Protect `main` with a rule that requires the strict `verify` status-check context and a pull request before merge, dismisses stale reviews, resolves conversations, applies to administrators, and blocks force pushes and deletion.
-2. In the repository's release settings, enable **Immutable releases**. The workflow checks the repository API and stops before packing if this is false.
-3. Create the GitHub environment `npm-release`, restrict it to the exact `main` branch, and require a maintainer approval. The release job cannot run outside that environment.
-4. Because npm trusted publishers can only be configured from an existing package's settings, create a short-lived granular npm token for the first `@gaulatti/thompson` publish. Store it only as the environment secret `NPM_TOKEN`; never add it to repository secrets or files.
-5. Merge the release commit after CI passes, then manually dispatch `Release` from `main` with the exact `v<package version>` tag.
+```bash
+npm version patch   # or minor / major; commits and creates the v<version> tag
+git push --follow-tags
+```
 
-The workflow refuses a branch SHA, a stale `main`, a mismatched tag/version, disabled GitHub release immutability, or an existing tag, GitHub release, or npm version. It creates one tarball and checksum, attaches both to a draft GitHub release, publishes that exact tarball to npm with provenance, verifies the public-registry artifact from a clean consumer, then publishes the GitHub release. Publishing locks its tag and assets.
+The `v*` tag runs `.github/workflows/publish.yml`, which installs from the lockfile, checks the package and publishes to npm with provenance. Update `CHANGELOG.md` in the commit before the version bump.
 
 ## Trusted publishing
 
-Immediately after the bootstrap release, configure the npm package's GitHub Actions trusted publisher with these exact values:
+npm trusted publishers can be configured only on a package that already exists, so the first publish uses a short-lived token:
 
-- owner: `gaulatti`
-- repository: `thompson`
-- workflow filename: `release.yml`
-- environment: `npm-release`
-- allowed action: `npm publish`
+1. Create a granular npm token with publish rights for `@gaulatti/thompson` and a one-day expiry, and store it only as the `thompson` environment secret `NPM_TOKEN`.
+2. Push the first `v*` tag (`v0.1.0`).
+3. In the npm package settings, add the GitHub Actions trusted publisher with these exact values:
+   - owner: `gaulatti`
+   - repository: `thompson`
+   - workflow filename: `publish.yml`
+   - environment: `thompson`
+4. Delete the `NPM_TOKEN` environment secret, and restrict traditional token publishing in the npm package settings. From then on npm authenticates the workflow through OIDC and records provenance.
 
-Delete the `NPM_TOKEN` environment secret after an OIDC release succeeds, and restrict traditional token publishing in npm package settings. The workflow grants `id-token: write`, pins an OIDC-capable npm CLI, and runs on a GitHub-hosted runner. With the protected secret absent, npm authenticates this exact workflow through OIDC and automatically records public-package provenance.
-
-See npm's [trusted publishing guide](https://docs.npmjs.com/trusted-publishers/) for the registry-side setup and GitHub's [immutable releases documentation](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases) for the repository guarantee.
+See npm's [trusted publishing guide](https://docs.npmjs.com/trusted-publishers/).
 
 ## Immutable releases
 
-All actions are pinned to full commit SHAs. The release job checks out and compares the workflow SHA, local HEAD, and remote `main`; packages the exact tree; and verifies after publication that the npm integrity, Git tag commit, GitHub release target, immutable flag, and release-asset digest all agree. Never move, replace, or delete a published tag or asset.
-
-## Failure recovery
-
-- If validation fails, fix the repository in a new PR. Do not bypass or rerun against a different SHA.
-- If npm publication fails, the GitHub release remains a draft. Verify that the npm version is absent, delete only that draft, fix the credential or service problem, and dispatch the same `main` SHA again.
-- If npm succeeds but final GitHub publication fails, do not publish another tarball or version. Compare the npm integrity with the draft asset and `SHA256SUMS`, confirm the draft target is the workflow SHA, then publish that existing draft.
-- If post-publication verification fails, keep the immutable evidence intact and investigate before changing consumers.
+All workflow actions are pinned to full commit SHAs. A published npm version is never overwritten, and a pushed release tag is never moved or deleted. If a publish fails, fix it in a new commit and release the next version.
 
 ## Rollback
 
